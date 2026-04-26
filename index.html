@@ -115,7 +115,10 @@
     .b-rank.g1 { color:#FFD700; } .b-rank.g2 { color:#C0C0C0; } .b-rank.g3 { color:#CD7F32; }
     .b-name  { flex:1; font-size:16px; font-weight:700; color:#fff; }
     .b-score { font-size:20px; font-weight:900; color:var(--accent); }
-    .b-empty { text-align:center; color:var(--text2); font-size:14px; padding:24px 0; }
+    .b-empty   { text-align:center; color:var(--text2); font-size:14px; padding:24px 0; }
+    .b-loading { text-align:center; color:var(--text2); font-size:14px; padding:24px 0;
+      animation:pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
   </style>
 </head>
 <body>
@@ -383,19 +386,46 @@ function gameOver() {
   showScreen('s-result');
 }
 
-function submitScore() {
-  const name = document.getElementById('name-in').value;
-  saveScore(name, stage);
+async function submitScore() {
+  const name = document.getElementById('name-in').value.trim() || '익명';
+  saveScore(name, stage); // 로컬 항상 저장
+
+  if (_db) {
+    const btn = document.querySelector('#s-result .btn-primary');
+    const orig = btn.textContent;
+    btn.disabled = true; btn.textContent = '저장 중...';
+    try {
+      await _db.ref('scores').push({ name, stage, ts: Date.now() });
+    } catch(e) {}
+    btn.disabled = false; btn.textContent = orig;
+  }
   showBoard();
 }
 
 // ── 랭킹 ──
-function renderBoard() {
-  const scores = loadScores().slice(0, 10);
+function showBoard() { renderBoard(); }
+
+async function renderBoard() {
+  showScreen('s-board');
+  document.getElementById('board-list').innerHTML = '<div class="b-loading">🕊️ 로딩 중...</div>';
+
+  let scores = [];
+  if (_db) {
+    try {
+      const snap = await _db.ref('scores').orderByChild('stage').limitToLast(20).get();
+      snap.forEach(child => scores.push(child.val()));
+      scores.sort((a, b) => b.stage - a.stage);
+    } catch(e) {
+      scores = loadScores(); // Firebase 실패 시 로컬 폴백
+    }
+  } else {
+    scores = loadScores();
+  }
+
   const medals = ['g1','g2','g3'];
   const icons  = ['🥇','🥈','🥉'];
   document.getElementById('board-list').innerHTML = scores.length
-    ? scores.map((s, i) => `
+    ? scores.slice(0, 10).map((s, i) => `
         <div class="b-row">
           <div class="b-rank ${medals[i]||''}">${icons[i] || i+1}</div>
           <div class="b-name">${s.name}</div>
@@ -404,12 +434,27 @@ function renderBoard() {
     : '<div class="b-empty">아직 기록이 없습니다 🕊️</div>';
 }
 
+// ── Firebase 초기화 (설정 미완료 시 로컬 모드로 자동 전환) ──
+let _db = null;
+function initFirebase() {
+  try {
+    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('프로젝트')) {
+      firebase.initializeApp(firebaseConfig);
+      _db = firebase.database();
+    }
+  } catch(e) {}
+}
+
 // ── 초기화 ──
 document.getElementById('splash-bird').innerHTML = pigeonSVG(150, 150);
 document.getElementById('home-bird').innerHTML   = pigeonSVG(100, 100);
+initFirebase();
 showHome();
 setTimeout(() => { showHome(); }, 2600);
 </script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
