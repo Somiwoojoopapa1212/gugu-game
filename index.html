@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json"/>
   <meta name="theme-color" content="#1A237E"/>
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml"/>
   <title>구구단 게임 🕊️</title>
   <style>
     :root {
@@ -180,7 +181,10 @@
 <div id="s-board" class="screen">
   <div class="board-hd">🏆 랭킹</div>
   <div class="board-list" id="board-list"></div>
-  <button class="btn btn-ghost btn-sm" onclick="showHome()">← 돌아가기</button>
+  <div style="display:flex;gap:10px;margin-top:4px">
+    <button class="btn btn-ghost btn-sm" onclick="renderBoard()">🔄 새로고침</button>
+    <button class="btn btn-ghost btn-sm" onclick="showHome()">← 돌아가기</button>
+  </div>
 </div>
 
 <!-- Flash overlay -->
@@ -396,7 +400,7 @@ function gameOver() {
 
 async function submitScore() {
   const name = document.getElementById('name-in').value.trim() || '익명';
-  saveScore(name, stage); // 로컬 항상 저장
+  saveScore(name, stage);
 
   if (_db) {
     const btn = document.querySelector('#s-result .btn-primary');
@@ -404,10 +408,26 @@ async function submitScore() {
     btn.disabled = true; btn.textContent = '저장 중...';
     try {
       await _db.ref('scores').push({ name, stage, ts: Date.now() });
-    } catch(e) {}
+      console.log('[Firebase] ✅ 점수 저장 완료:', name, 'Stage', stage);
+      showToast('🌐 글로벌 랭킹에 저장되었습니다!', '#00C853');
+    } catch(e) {
+      console.error('[Firebase] ❌ 점수 저장 실패:', e);
+      showToast('⚠️ 저장 실패 — 로컬에만 기록됩니다', '#FF9800');
+    }
     btn.disabled = false; btn.textContent = orig;
   }
   showBoard();
+}
+
+function showToast(msg, color) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+    background:${color};color:#fff;font-size:14px;font-weight:700;
+    padding:10px 20px;border-radius:24px;z-index:999;
+    box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
 }
 
 // ── 랭킹 ──
