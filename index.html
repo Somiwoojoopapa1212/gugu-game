@@ -441,7 +441,8 @@ async function renderBoard() {
   if (_db) {
     try {
       const snap = await _db.ref('scores').get();
-      snap.forEach(child => scores.push(child.val()));
+      const data = snap.val();
+      if (data) scores = Object.values(data).filter(s => s && s.stage != null);
       scores.sort((a, b) => b.stage - a.stage);
       isGlobal = true;
       console.log('[Firebase] 랭킹 로드 완료:', scores.length, '건');
