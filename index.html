@@ -183,6 +183,11 @@
 <!-- Flash overlay -->
 <div id="flash"></div>
 
+<!-- Firebase SDK (메인 스크립트보다 먼저 로드) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+
 <script>
 // ── SVG 비둘기 ──
 function pigeonSVG(w, h) {
@@ -456,9 +461,6 @@ setTimeout(() => {
 // 스플래시 탭해도 홈으로 이동
 document.getElementById('s-splash').addEventListener('click', showHome);
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
