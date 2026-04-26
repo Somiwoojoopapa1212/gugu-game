@@ -10,7 +10,7 @@
 const firebaseConfig = {
   apiKey:            "AIzaSyCkfBmdwjVErIJvYnUS5x6uskF_TAXKpSE",
   authDomain:        "gugu-game-aa022.firebaseapp.com",
-  databaseURL:       "https://gugu-game-aa022-default-rtdb.firebaseio.com",
+  databaseURL:       "https://gugu-game-aa022-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId:         "gugu-game-aa022",
   storageBucket:     "gugu-game-aa022.firebasestorage.app",
   messagingSenderId: "9024485746",
