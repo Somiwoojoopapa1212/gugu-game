@@ -8,11 +8,11 @@
 // ──────────────────────────────────────────────────────────────────────────────
 
 const firebaseConfig = {
-  apiKey:            "여기에_API_KEY",
-  authDomain:        "프로젝트ID.firebaseapp.com",
-  databaseURL:       "https://프로젝트ID-default-rtdb.firebaseio.com",
-  projectId:         "프로젝트ID",
-  storageBucket:     "프로젝트ID.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId:             "APP_ID"
+  apiKey:            "AIzaSyCkfBmdwjVErIJvYnUS5x6uskF_TAXKpSE",
+  authDomain:        "gugu-game-aa022.firebaseapp.com",
+  databaseURL:       "https://gugu-game-aa022-default-rtdb.firebaseio.com",
+  projectId:         "gugu-game-aa022",
+  storageBucket:     "gugu-game-aa022.firebasestorage.app",
+  messagingSenderId: "9024485746",
+  appId:             "1:9024485746:web:99672555eaee35e86a45eb"
 };
