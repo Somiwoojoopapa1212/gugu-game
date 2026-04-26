@@ -1,4 +1,4 @@
-const CACHE = 'gugu-v2';
+const CACHE = 'gugu-v3';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', e => {
