@@ -420,7 +420,7 @@ async function renderBoard() {
   let scores = [], isGlobal = false;
   if (_db) {
     try {
-      const snap = await _db.ref('scores').orderByChild('stage').limitToLast(20).get();
+      const snap = await _db.ref('scores').get();
       snap.forEach(child => scores.push(child.val()));
       scores.sort((a, b) => b.stage - a.stage);
       isGlobal = true;
