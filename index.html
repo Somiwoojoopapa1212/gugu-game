@@ -449,8 +449,12 @@ function initFirebase() {
 document.getElementById('splash-bird').innerHTML = pigeonSVG(150, 150);
 document.getElementById('home-bird').innerHTML   = pigeonSVG(100, 100);
 initFirebase();
-showHome();
-setTimeout(() => { showHome(); }, 2600);
+// 스플래시 → 2.6초 후 홈 (스플래시 화면일 때만 전환)
+setTimeout(() => {
+  if (document.getElementById('s-splash').classList.contains('active')) showHome();
+}, 2600);
+// 스플래시 탭해도 홈으로 이동
+document.getElementById('s-splash').addEventListener('click', showHome);
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
