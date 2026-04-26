@@ -116,6 +116,9 @@
     .b-name  { flex:1; font-size:16px; font-weight:700; color:#fff; }
     .b-score { font-size:20px; font-weight:900; color:var(--accent); }
     .b-empty   { text-align:center; color:var(--text2); font-size:14px; padding:24px 0; }
+    .b-source  { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; margin-left:8px; vertical-align:middle; }
+    .b-source.global { background:rgba(0,200,83,.2); color:#00C853; }
+    .b-source.local  { background:rgba(255,255,255,.1); color:var(--text2); }
     .b-loading { text-align:center; color:var(--text2); font-size:14px; padding:24px 0;
       animation:pulse 1s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
@@ -414,18 +417,27 @@ async function renderBoard() {
   showScreen('s-board');
   document.getElementById('board-list').innerHTML = '<div class="b-loading">🕊️ 로딩 중...</div>';
 
-  let scores = [];
+  let scores = [], isGlobal = false;
   if (_db) {
     try {
       const snap = await _db.ref('scores').orderByChild('stage').limitToLast(20).get();
       snap.forEach(child => scores.push(child.val()));
       scores.sort((a, b) => b.stage - a.stage);
+      isGlobal = true;
+      console.log('[Firebase] 랭킹 로드 완료:', scores.length, '건');
     } catch(e) {
-      scores = loadScores(); // Firebase 실패 시 로컬 폴백
+      console.error('[Firebase] 랭킹 읽기 실패:', e);
+      scores = loadScores();
     }
   } else {
+    console.warn('[Firebase] _db 없음 → 로컬 랭킹 표시');
     scores = loadScores();
   }
+
+  // 헤더에 글로벌/로컬 표시
+  document.querySelector('#s-board .board-hd').innerHTML = isGlobal
+    ? '🏆 랭킹 <span class="b-source global">🌐 글로벌</span>'
+    : '🏆 랭킹 <span class="b-source local">📱 로컬</span>';
 
   const medals = ['g1','g2','g3'];
   const icons  = ['🥇','🥈','🥉'];
@@ -439,15 +451,21 @@ async function renderBoard() {
     : '<div class="b-empty">아직 기록이 없습니다 🕊️</div>';
 }
 
-// ── Firebase 초기화 (설정 미완료 시 로컬 모드로 자동 전환) ──
+// ── Firebase 초기화 ──
 let _db = null;
 function initFirebase() {
   try {
-    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes('프로젝트')) {
-      firebase.initializeApp(firebaseConfig);
-      _db = firebase.database();
+    if (typeof firebase === 'undefined') { console.warn('[Firebase] SDK 미로드'); return; }
+    if (typeof firebaseConfig === 'undefined' || !firebaseConfig.databaseURL || firebaseConfig.databaseURL.includes('프로젝트')) {
+      console.warn('[Firebase] config 미설정 → 로컬 모드'); return;
     }
-  } catch(e) {}
+    // 중복 초기화 방지
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    _db = firebase.database();
+    console.log('[Firebase] ✅ 연결 성공');
+  } catch(e) {
+    console.error('[Firebase] ❌ 초기화 실패:', e);
+  }
 }
 
 // ── 초기화 ──
